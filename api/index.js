@@ -1,31 +1,30 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
-    const { data } = await axios.get('https://goldrate.qa//');
-    const $ = cheerio.load(data);
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto('https://goldrate.qa/', { waitUntil: 'networkidle0' });
 
-    const prices = [];
-    $('table tr').each((index, element) => {
-      const tds = $(element).find('td');
-      const karat = $(tds[0]).text().trim();
-      const priceQAR = $(tds[1]).text().trim();
-      const priceUSD = $(tds[2]).text().trim();
-
-      // Only push valid rows
-      if (karat && priceQAR && priceUSD) {
-        prices.push({
-          karat,
-          priceQAR,
-          priceUSD
-        });
-      }
+    const data = await page.evaluate(() => {
+      const prices = [];
+      document.querySelectorAll('table tr').forEach((row) => {
+        const tds = row.querySelectorAll('td');
+        if (tds.length > 0) {
+          prices.push({
+            karat: tds[0].innerText.trim(),
+            priceQAR: tds[1].innerText.trim(),
+            priceUSD: tds[2].innerText.trim(),
+          });
+        }
+      });
+      return prices;
     });
 
-    res.status(200).json(prices);  // Respond with the prices array
+    await browser.close();
+    res.status(200).json(data); // Return scraped data as JSON response
   } catch (error) {
     console.error('Error scraping data:', error);
     res.status(500).json({ error: 'Failed to scrape data' });
   }
-};
+}
