@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const scrapeGoldPrices = async (req, res) => {
+const scrapeGoldPrices = async () => {
   try {
     const { data } = await axios.get('https://goldpriceqatar.com/');
     const $ = cheerio.load(data);
@@ -9,19 +9,24 @@ const scrapeGoldPrices = async (req, res) => {
     const prices = [];
     $('table tr').each((index, element) => {
       const tds = $(element).find('td');
-      prices.push({
-        karat: $(tds[0]).text().trim(),
-        priceQAR: $(tds[1]).text().trim(),
-        priceUSD: $(tds[2]).text().trim(),
-      });
+      const karat = $(tds[0]).text().trim();
+      const priceQAR = $(tds[1]).text().trim();
+      const priceUSD = $(tds[2]).text().trim();
+
+      // Only push valid rows
+      if (karat && priceQAR && priceUSD) {
+        prices.push({
+          karat,
+          priceQAR,
+          priceUSD
+        });
+      }
     });
 
-    // Return the prices as a JSON response
-    res.json(prices);
+    console.log(prices);
   } catch (error) {
     console.error('Error scraping data:', error);
-    res.status(500).send('Error scraping data');
   }
 };
 
-module.exports = scrapeGoldPrices;
+scrapeGoldPrices();
