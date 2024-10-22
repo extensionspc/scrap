@@ -1,9 +1,9 @@
 {
-  "name": "scraper",
+  "name": "scrap-tan",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "axios": "^0.21.1",
-    "cheerio": "^1.0.0-rc.10"
+    "chrome-aws-lambda": "^10.1.0",
+    "puppeteer-core": "^19.6.3"
   }
 }
