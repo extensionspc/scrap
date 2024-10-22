@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const scrapeGoldPrices = async () => {
+module.exports = async (req, res) => {
   try {
     const { data } = await axios.get('https://goldpriceqatar.com/');
     const $ = cheerio.load(data);
@@ -23,10 +23,9 @@ const scrapeGoldPrices = async () => {
       }
     });
 
-    console.log(prices);
+    res.status(200).json(prices);  // Respond with the prices array
   } catch (error) {
     console.error('Error scraping data:', error);
+    res.status(500).json({ error: 'Failed to scrape data' });
   }
 };
-
-scrapeGoldPrices();
