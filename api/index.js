@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 
 module.exports = async (req, res) => {
   try {
-    const { data } = await axios.get('https://goldpriceqatar.com/');
+    const { data } = await axios.get('https://goldrate.qa//');
     const $ = cheerio.load(data);
 
     const prices = [];
